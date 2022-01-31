@@ -1,23 +1,15 @@
 version: 0.2
 
 phases:
-  pre_build:
-    commands:
-      - cd src
-      # Install the dependencies
-      - npm install
   build:
     commands:
-      # Run tests
-      - npm test
-      # Remove all dependencies not relevant for production
-      - npm prune --production
-      - cd ..
+    - echo "This is build phase... Zipping my lambda function"
+    - zip -r deployment_package.zip app.js
   post_build:
     commands:
-      # Create and upload a deployment package
-      - aws cloudformation package --template-file sam-template.yaml --s3-bucket $S3_BUCKET --output-template-file sam-template-output.yaml
-
+    - echo "Deploying to the Lambda"
+    - aws lambda update-function-code --function-name  my-lambda-cicd --zip-file fileb://deployment_package.zip
 artifacts:
-  files:
-    - sam-template-output.yaml
+  type: zip
+  paths:
+    - '*'
